@@ -15,7 +15,7 @@ const Footer: React.FC = () => {
           <div className="flex items-center space-x-2">
             <span className="text-sm text-gray-600 dark:text-gray-400">Made with</span>
             <HeartIcon className="h-4 w-4 text-red-500 animate-pulse" />
-            <span className="text-sm text-gray-600 dark:text-gray-400">and Hugging Face Transformers</span>
+            <span className="text-sm text-gray-600 dark:text-gray-400">by Bankupalli Ravi Teja</span>
           </div>
           
           <div className="flex space-x-4">
