@@ -7,6 +7,9 @@ const corsHeaders = {
   'Access-Control-Max-Age': '86400',
 };
 
+// Initialize pipeline outside request handler for better performance
+let generator;
+
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -44,13 +47,19 @@ Deno.serve(async (req) => {
       throw new Error('Missing required fields');
     }
 
-    // Initialize the text generation pipeline with error handling
-    let generator;
-    try {
-      generator = await pipeline('text-generation', 'Xenova/gpt2-screenplay');
-    } catch (error) {
-      console.error('Failed to initialize pipeline:', error);
-      throw new Error('Failed to initialize text generation model');
+    // Initialize the generator only once
+    if (!generator) {
+      console.log('Initializing text generation pipeline...');
+      try {
+        generator = await pipeline('text-generation', 'Xenova/gpt2-screenplay', {
+          cache_dir: '/tmp/transformers-cache',
+          revision: 'main'
+        });
+        console.log('Pipeline initialized successfully');
+      } catch (error) {
+        console.error('Pipeline initialization error:', error);
+        throw new Error(`Failed to initialize model: ${error.message}`);
+      }
     }
 
     // Create a prompt that follows screenplay format
@@ -67,6 +76,7 @@ EXT. ${setting.toUpperCase()} - DAY
 ${plotPoints}
 `.trim();
 
+    console.log('Generating screenplay...');
     // Generate the screenplay with error handling
     const result = await generator(prompt, {
       max_length: 1000,
@@ -75,10 +85,11 @@ ${plotPoints}
       top_k: 50,
       top_p: 0.9,
     }).catch((error) => {
-      console.error('Generation failed:', error);
-      throw new Error('Failed to generate screenplay');
+      console.error('Generation error:', error);
+      throw new Error(`Generation failed: ${error.message}`);
     });
 
+    console.log('Screenplay generated successfully');
     // Process the generated text
     const screenplay = result[0].generated_text
       .replace(/\n{3,}/g, '\n\n')

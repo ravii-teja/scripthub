@@ -8,16 +8,29 @@ const supabase = createClient(
 
 export const generateScreenplay = async (formData: ScriptFormData): Promise<string> => {
   try {
+    console.log('Invoking generate-script function...');
     const { data, error } = await supabase.functions.invoke('generate-script', {
       body: JSON.stringify(formData)
     });
 
-    if (error) throw new Error(error.message);
-    if (!data?.screenplay) throw new Error('No screenplay generated');
+    if (error) {
+      console.error('Supabase function error:', error);
+      throw new Error(`Supabase function error: ${error.message}`);
+    }
 
+    if (!data?.screenplay) {
+      console.error('No screenplay in response:', data);
+      throw new Error('No screenplay generated');
+    }
+
+    console.log('Screenplay generated successfully');
     return data.screenplay;
   } catch (error) {
     console.error('Error generating screenplay:', error);
-    throw new Error('Failed to generate screenplay. Please try again.');
+    throw new Error(
+      error instanceof Error 
+        ? error.message 
+        : 'Failed to generate screenplay. Please try again.'
+    );
   }
 };
