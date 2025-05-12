@@ -1,0 +1,12 @@
+{
+  "name": "scripthub-backend",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "deploy": "supabase functions deploy"
+  },
+  "dependencies": {
+    "@xenova/transformers": "^2.15.1"
+  }
+}
